@@ -1,6 +1,6 @@
-# MK Pizza & Ice Bar — Advanced POS
+# MK Pizza & Ice Bar — Advanced FastFood POS
 
-Advanced desktop Point of Sale and small-business management system for **MK Pizza & Ice Bar**, built with Python, Tkinter and SQLite.
+Advanced single-location desktop POS and business-management system for **MK Pizza & Ice Bar**, built with Python, Tkinter and SQLite.
 
 ## Business defaults
 
@@ -10,7 +10,7 @@ Advanced desktop Point of Sale and small-business management system for **MK Piz
 - Currency: **Rs.**
 - Tax: **0%**
 - Business day: **06:00 → 05:59** by default; configurable in Settings
-- Printer: Bluetooth/ESC-POS 80mm configuration in Settings
+- Thermal printer: **80mm ESC/POS Bluetooth/COM**, configured in Settings
 
 ## Default users
 
@@ -19,60 +19,63 @@ Advanced desktop Point of Sale and small-business management system for **MK Piz
 | admin | Admin | `0099` |
 | owner | Owner | `0099` |
 
-## Modules
+## Functional modules
 
-- Dashboard
-- POS / orders
-- Products and categories
-- Bulk menu CSV import/export
-- Inventory and stock movements
-- Customers and customer ledgers
-- Suppliers and supplier ledgers
-- Purchases and supplier dues
-- Expenses
-- Cash in / cash out
-- Opening and closing cash reconciliation
-- Configurable business day
-- Sales history and filtering
-- Product/customer/supplier transaction history
-- Profit/Loss and COGS reporting
-- Cash-flow records
-- Double-entry journal / trial balance foundation
-- Audit log
-- Database backup/restore utilities
-- Bluetooth thermal printer discovery/reconnect helpers
+- Dashboard with sales, orders, gross/net profit, expenses, customer dues and supplier dues
+- POS with search, categories, stock validation, dine-in/takeaway/delivery and receipt printing
+- Cash, Card, Mobile Wallet and Credit sales
+- Customer selection and customer credit ledger
+- Product/menu CRUD, deactivate-all, stock adjustments and history
+- CSV bulk menu import/export
+- Customer CRUD, dues, payments, exports and transaction history
+- Supplier CRUD, dues, payments, exports and transaction history
+- Purchases with stock receiving, supplier payable and partial payment
+- Expenses with cash/bank posting
+- Business-day opening, configurable day boundary, cash in/out and end-of-day reconciliation
+- Sales history with date/payment/search filters and sale detail
+- Product, customer and supplier drill-down history
+- Double-entry accounting, trial balance and P&L
+- COGS and inventory movement accounting
+- Cash-flow records and reconciliation
+- Audit log foundation
+- SQLite WAL mode and indexed transaction/history queries
+- Consistent SQLite backup/restore
+- Bluetooth printer discovery, saved configuration and automatic reconnect attempts
+- Automated regression tests for sales, discounts, credit, purchases and party payments
 
-## Financial model
+## Bulk menu
 
-Sales, purchases and expenses are designed to update inventory, cash/receivables/payables and accounting journals together. Core sales and purchasing operations use database transactions so stock and financial records do not partially update after an error.
+CSV import/export is supported for SKU, product name, category, price, cost, stock and reorder level.
+
+## 80mm printer
+
+Pair the Bluetooth printer with the operating system when required. In **Settings**, scan/select the printer or enter its MAC address. On Windows, a paired printer exposed through a COM port can be configured directly. The POS saves the configuration and starts background reconnect attempts after launch/disconnect.
+
+Automatic Bluetooth pairing cannot be guaranteed by a desktop Python application because pairing and permissions are controlled by the operating system and printer hardware.
 
 ## Run
 
-Python 3.10+ with Tkinter is recommended.
+Python 3.10+ with Tkinter is recommended:
 
 ```bash
 pip install -r requirements.txt
 python app.py
 ```
 
-The local `fastfood_pos.db` file is created automatically.
+The local `fastfood_pos.db` database is created automatically.
 
 ## Project structure
 
-- `app.py` — desktop POS UI
-- `database.py` — database schema, defaults, ledgers, business-day and audit operations
-- `modules/services.py` — transactional sales/purchase services
-- `modules/accounting.py` — double-entry journal and financial reporting foundation
+- `app.py` — POS desktop UI and operational modules
+- `database.py` — SQLite schema, settings, inventory, ledgers, cash and business-day operations
+- `modules/services.py` — transactional sales, purchases and customer/supplier payments
+- `modules/accounting.py` — double-entry journal, trial balance and P&L
 - `modules/import_export.py` — bulk product CSV import/export
-- `modules/printer.py` — Bluetooth/ESC-POS printer helper
-- `modules/backup.py` — consistent SQLite backup/restore utility
+- `modules/printer.py` — Bluetooth/ESC-POS printer discovery and reconnect helper
+- `modules/backup.py` — SQLite backup/restore
 - `tests/test_core.py` — regression tests
 - `.github/workflows/python-check.yml` — compile and automated test workflow
 
-## 80mm printer
+## Deployment scope
 
-Pair the Bluetooth printer with the operating system first where required, then configure its MAC/name/COM port/channel in Settings. The printer helper supports discovery where the OS exposes it, ESC/POS test printing and background reconnect attempts.
-
-## Important deployment note
-
-This is an advanced single-location desktop POS foundation. For a true multi-branch enterprise deployment, the next architectural step is a server/API backend, PostgreSQL or equivalent production database, encrypted credentials, centralized authentication, synchronized branches and remote backup/monitoring.
+This release is a **fully operational advanced single-location desktop POS foundation**. It is not a multi-branch cloud ERP. Enterprise multi-branch deployment would additionally require a server/API backend, PostgreSQL-class production database, centralized authentication, encrypted secrets, branch synchronization, remote backup and monitoring.
