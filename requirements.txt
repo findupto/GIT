@@ -1,0 +1,1 @@
+# FastFood POS uses only Python standard library (Tkinter + SQLite).
