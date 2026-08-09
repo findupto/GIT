@@ -21,6 +21,7 @@ Advanced single-location desktop POS and business-management system for **MK Piz
 
 ## Functional modules
 
+- Premium dark/gold POS visual theme
 - Dashboard with sales, orders, gross/net profit, expenses, customer dues and supplier dues
 - POS with search, categories, stock validation, dine-in/takeaway/delivery and receipt printing
 - Cash, Card, Mobile Wallet and Credit sales
@@ -40,18 +41,42 @@ Advanced single-location desktop POS and business-management system for **MK Piz
 - Audit log foundation
 - SQLite WAL mode and indexed transaction/history queries
 - Consistent SQLite backup/restore
-- Bluetooth printer discovery, saved configuration and automatic reconnect attempts
+- Bluetooth printer discovery, Windows RFCOMM/COM mapping, Linux service-channel discovery, saved configuration and automatic reconnect attempts
+- Printer auto-detection across exposed COM ports and common baud rates
+- Standalone printer diagnostic/test utility
 - Automated regression tests for sales, discounts, credit, purchases and party payments
 
 ## Bulk menu
 
-CSV import/export is supported for SKU, product name, category, price, cost, stock and reorder level.
+CSV import/export is supported for SKU, product name, category, price, cost, stock and reorder level. Import updates existing SKUs and validates the menu data before writing records.
 
-## 80mm printer
+## 80mm thermal printer — important
 
-Pair the Bluetooth printer with the operating system when required. In **Settings**, scan/select the printer or enter its MAC address. On Windows, a paired printer exposed through a COM port can be configured directly. The POS saves the configuration and starts background reconnect attempts after launch/disconnect.
+### Windows
 
-Automatic Bluetooth pairing cannot be guaranteed by a desktop Python application because pairing and permissions are controlled by the operating system and printer hardware.
+1. Pair the printer in **Windows Bluetooth Settings** first.
+2. Open Windows **Bluetooth / COM port** settings and identify the printer's **OUTGOING COM port**.
+3. Put that COM port in POS Settings.
+4. The POS tests common printer baud rates automatically when connecting.
+5. Save Settings. The POS reconnects to that COM port whenever the POS starts or the printer disconnects.
+
+**Do not randomly enter RFCOMM channel numbers on Windows.** Windows owns the Bluetooth RFCOMM service and maps it to a COM port. A channel such as 1/2/3/etc. is not a replacement for the Windows outgoing COM port.
+
+If no COM port works, run:
+
+```bash
+python tools/printer_diagnostic.py
+```
+
+Use **AUTO-DETECT + TEST** to try all OS-exposed COM ports and common 80mm printer baud rates.
+
+### Linux
+
+The printer helper can discover Bluetooth devices and, when `sdptool` is available, discover RFCOMM service channels. The selected MAC + discovered channel can then be used for direct RFCOMM printing.
+
+### Hardware caveat
+
+Automatic *pairing* cannot be guaranteed by a desktop Python application because Bluetooth pairing, permissions, drivers and RFCOMM services are controlled by the operating system and printer hardware. Once the OS has paired/exposed the printer transport, the POS handles connection, test printing and automatic reconnect.
 
 ## Run
 
@@ -71,8 +96,10 @@ The local `fastfood_pos.db` database is created automatically.
 - `modules/services.py` — transactional sales, purchases and customer/supplier payments
 - `modules/accounting.py` — double-entry journal, trial balance and P&L
 - `modules/import_export.py` — bulk product CSV import/export
-- `modules/printer.py` — Bluetooth/ESC-POS printer discovery and reconnect helper
+- `modules/printer.py` — Bluetooth/ESC-POS printer discovery, Windows COM mapping, RFCOMM service discovery and reconnect helper
+- `modules/luxury_theme.py` — premium visual system
 - `modules/backup.py` — SQLite backup/restore
+- `tools/printer_diagnostic.py` — standalone thermal printer discovery/diagnostic/test utility
 - `tests/test_core.py` — regression tests
 - `.github/workflows/python-check.yml` — compile and automated test workflow
 
