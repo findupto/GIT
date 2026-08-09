@@ -1,0 +1,1 @@
+"""FastFood POS application modules."""
