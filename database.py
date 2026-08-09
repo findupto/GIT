@@ -22,12 +22,30 @@ class Database:
         CREATE TABLE IF NOT EXISTS stock_movements(id INTEGER PRIMARY KEY AUTOINCREMENT,product_id INTEGER NOT NULL REFERENCES products(id),movement_type TEXT NOT NULL,qty REAL NOT NULL,note TEXT,created_at TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);
         ''')
-        self.conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES('admin','admin123','admin')")
-        self.conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES('cashier','cashier123','cashier')")
+
+        # MK Pizza & Ice Bar default accounts.
+        self.conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES('admin','0099','Admin')")
+        self.conn.execute("INSERT OR IGNORE INTO users(username,password,role) VALUES('owner','0099','Owner')")
+        self.conn.execute("UPDATE users SET password='0099', role='Admin', active=1 WHERE username='admin'")
+        self.conn.execute("UPDATE users SET password='0099', role='Owner', active=1 WHERE username='owner'")
+        self.conn.execute("UPDATE users SET active=0 WHERE username='cashier'")
+
         for name in ('Burgers','Pizza','Sides','Drinks','Desserts'):
             self.conn.execute('INSERT OR IGNORE INTO categories(name) VALUES(?)',(name,))
-        defaults={'store_name':'FASTFOOD POS','store_address':'Main Street, Pakistan','store_phone':'0300-0000000','tax_rate':'5','currency':'Rs','receipt_footer':'Thank you for your visit!'}
-        for k,v in defaults.items(): self.conn.execute('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)',(k,v))
+
+        defaults={
+            'store_name':'MK Pizza & Ice Bar',
+            'store_address':'Collage Road Abbas Chowk, Bhakkar, Pakistan',
+            'store_phone':'0316 9700025',
+            'tax_rate':'0',
+            'currency':'Rs.',
+            'printer_bluetooth_mac':'',
+            'receipt_footer':'Thank you for visiting MK Pizza & Ice Bar!'
+        }
+        for k,v in defaults.items():
+            self.conn.execute('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)',(k,v))
+            self.conn.execute('UPDATE settings SET value=? WHERE key=?',(v,k))
+
         if self.conn.execute('SELECT COUNT(*) FROM products').fetchone()[0]==0:
             seeds=[('Burgers','Classic Burger','BUR-001',350,180,50),('Burgers','Chicken Burger','BUR-002',450,240,50),('Pizza','Chicken Pizza','PIZ-001',900,500,30),('Pizza','Cheese Pizza','PIZ-002',800,420,30),('Sides','French Fries','SID-001',250,100,80),('Sides','Chicken Nuggets','SID-002',400,220,60),('Drinks','Soft Drink','DRK-001',120,60,100),('Drinks','Mineral Water','DRK-002',80,30,100),('Desserts','Ice Cream','DES-001',200,80,40)]
             for cat,name,sku,price,cost,stock in seeds:
@@ -37,6 +55,10 @@ class Database:
 
     def close(self): self.conn.close()
     def settings(self): return {r['key']:r['value'] for r in self.conn.execute('SELECT key,value FROM settings')}
+    def save_settings(self, values):
+        for key, value in values.items():
+            self.conn.execute('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',(key,str(value)))
+        self.conn.commit()
     def categories(self): return self.conn.execute('SELECT * FROM categories WHERE active=1 ORDER BY name').fetchall()
     def products(self,search='',category_id=None):
         sql='SELECT p.*,c.name category FROM products p JOIN categories c ON c.id=p.category_id WHERE p.active=1'; args=[]
