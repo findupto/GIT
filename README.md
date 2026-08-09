@@ -1,62 +1,78 @@
-# MK Pizza & Ice Bar POS
+# MK Pizza & Ice Bar — Advanced POS
 
-Professional desktop Point of Sale system for **MK Pizza & Ice Bar**, built with Python, Tkinter and SQLite.
+Advanced desktop Point of Sale and small-business management system for **MK Pizza & Ice Bar**, built with Python, Tkinter and SQLite.
 
-## Business Defaults
+## Business defaults
 
-- **Business:** MK Pizza & Ice Bar
-- **Address:** Collage Road Abbas Chowk, Bhakkar, Pakistan
-- **Phone:** 0316 9700025
-- **Currency:** Rs.
-- **Tax:** 0%
-- **Printer:** Configure the Bluetooth MAC address in Settings
+- Business: **MK Pizza & Ice Bar**
+- Address: **Collage Road Abbas Chowk, Bhakkar, Pakistan**
+- Phone: **0316 9700025**
+- Currency: **Rs.**
+- Tax: **0%**
+- Business day: **06:00 → 05:59** by default; configurable in Settings
+- Printer: Bluetooth/ESC-POS 80mm configuration in Settings
 
-## Features
-
-- Admin and Owner login
-- Dashboard with today's sales, order count, low-stock count and top sellers
-- POS order screen with product search and category filtering
-- Dine-in, Takeaway and Delivery order types
-- Cash, Card and Mobile Wallet payments
-- Discounts with 0% tax by default
-- Automatic stock deduction on completed sales
-- Stock adjustment and reorder levels
-- Product/SKU/category/price/cost management
-- Customer records and loyalty points
-- Sales history with date filtering
-- Sale detail lookup
-- Sales, tax, discount and estimated gross-profit reports
-- Payment-method breakdown
-- Receipt generation and receipt text-file output
-- Store information and configurable Bluetooth printer MAC setting
-- SQLite database with relational order, product, customer and inventory records
-
-## Default Users
+## Default users
 
 | Username | Role | Password |
 |---|---|---|
 | admin | Admin | `0099` |
 | owner | Owner | `0099` |
 
-The old `cashier` account is disabled by the database migration.
+## Modules
+
+- Dashboard
+- POS / orders
+- Products and categories
+- Bulk menu CSV import/export
+- Inventory and stock movements
+- Customers and customer ledgers
+- Suppliers and supplier ledgers
+- Purchases and supplier dues
+- Expenses
+- Cash in / cash out
+- Opening and closing cash reconciliation
+- Configurable business day
+- Sales history and filtering
+- Product/customer/supplier transaction history
+- Profit/Loss and COGS reporting
+- Cash-flow records
+- Double-entry journal / trial balance foundation
+- Audit log
+- Database backup/restore utilities
+- Bluetooth thermal printer discovery/reconnect helpers
+
+## Financial model
+
+Sales, purchases and expenses are designed to update inventory, cash/receivables/payables and accounting journals together. Core sales and purchasing operations use database transactions so stock and financial records do not partially update after an error.
 
 ## Run
 
-Requires Python 3.10+ with Tkinter available.
+Python 3.10+ with Tkinter is recommended.
 
 ```bash
+pip install -r requirements.txt
 python app.py
 ```
 
-The database `fastfood_pos.db` is created automatically.
+The local `fastfood_pos.db` file is created automatically.
 
-## Project Structure
+## Project structure
 
-- `app.py` - POS desktop application and UI
-- `database.py` - SQLite schema, business defaults, seed data and business operations
-- `requirements.txt` - dependency note
-- `fastfood_pos.db` - created locally at runtime; do not commit it
+- `app.py` — desktop POS UI
+- `database.py` — database schema, defaults, ledgers, business-day and audit operations
+- `modules/services.py` — transactional sales/purchase services
+- `modules/accounting.py` — double-entry journal and financial reporting foundation
+- `modules/import_export.py` — bulk product CSV import/export
+- `modules/printer.py` — Bluetooth/ESC-POS printer helper
+- `modules/backup.py` — consistent SQLite backup/restore utility
+- `tests/test_core.py` — regression tests
+- `.github/workflows/python-check.yml` — compile and automated test workflow
 
-## Printer
+## 80mm printer
 
-Set the receipt printer's Bluetooth MAC address in the application's Settings screen. The value is stored as `printer_bluetooth_mac` for hardware-specific Bluetooth printing integration.
+Pair the Bluetooth printer with the operating system first where required, then configure its MAC/name/COM port/channel in Settings. The printer helper supports discovery where the OS exposes it, ESC/POS test printing and background reconnect attempts.
+
+## Important deployment note
+
+This is an advanced single-location desktop POS foundation. For a true multi-branch enterprise deployment, the next architectural step is a server/API backend, PostgreSQL or equivalent production database, encrypted credentials, centralized authentication, synchronized branches and remote backup/monitoring.
