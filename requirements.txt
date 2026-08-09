@@ -1,1 +1,3 @@
-# FastFood POS uses only Python standard library (Tkinter + SQLite).
+pyserial>=3.5
+# Tkinter and SQLite are provided by standard desktop Python installations.
+# Optional Excel support can be added later without changing the database format.
