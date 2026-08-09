@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+fastfood_pos.db
+pos.db
+receipt_*.txt
+.DS_Store
